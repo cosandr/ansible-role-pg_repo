@@ -1,0 +1,24 @@
+galaxy_info:
+  author: Andrei Costescu
+  description: Setup PostgreSQL repos
+
+  license: MIT
+
+  min_ansible_version: "2.12"
+
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Fedora
+      versions:
+        - "35"
+        - "36"
+
+  galaxy_tags:
+    - database
+    - postgresql
+    - postgres
+
+dependencies: []

@@ -1,0 +1,7 @@
+---
+
+- include_tasks:
+    file: "{{ ansible_os_family }}.yml"
+    apply:
+      tags: ["install"]
+  tags: ["always"]

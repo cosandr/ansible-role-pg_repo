@@ -1,0 +1,49 @@
+---
+
+- name: Install PGSQL rpm key
+  ansible.builtin.rpm_key:
+    key: "https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG"
+    state: present
+
+- name: Set repo facts [Fedora]
+  ansible.builtin.set_fact:
+    __psql_repo_url: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/fedora/fedora-$releasever-$basearch"
+    __psql_common_url: "https://download.postgresql.org/pub/repos/yum/common/fedora/fedora-$releasever-$basearch"
+  when: ansible_distribution == 'Fedora'
+
+- name: Set repo facts [EL]
+  ansible.builtin.set_fact:
+    __psql_repo_url: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-$releasever-$basearch"
+    __psql_common_url: "https://download.postgresql.org/pub/repos/yum/common/redhat/rhel-$releasever-$basearch"
+  when: ansible_distribution != 'Fedora'
+
+- name: Install repositories
+  ansible.builtin.yum_repository:
+    name: "{{ item.name }}"
+    description: "{{ item.description }}"
+    baseurl: "{{ item.baseurl }}"
+    file: "{{ item.name }}"
+    gpgcheck: true
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG"
+    repo_gpgcheck: true
+    enabled: true
+  loop:
+    - name: "pgdg-{{ postgresql_version }}"
+      description: "PostgreSQL {{ postgresql_version }} $releasever - $basearch"
+      baseurl: "{{ __psql_repo_url }}"
+    - name: pgdg-common
+      description: "PostgreSQL Common $releasever - $basearch"
+      baseurl: "{{ __psql_common_url }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Disable default PGSQL module
+  community.general.ini_file:
+    path: /etc/dnf/modules.d/postgresql.module
+    section: postgresql
+    option: state
+    value: disabled
+    no_extra_spaces: false
+    owner: root
+    group: root
+    mode: 0644
