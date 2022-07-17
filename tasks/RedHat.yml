@@ -1,8 +1,16 @@
 ---
 
+- name: Download PGDG GPG key
+  ansible.builtin.get_url:
+    url: "https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG"
+    dest: "/etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG"
+    owner: root
+    group: root
+    mode: 0644
+
 - name: Install PGSQL rpm key
   ansible.builtin.rpm_key:
-    key: "https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG"
+    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG
     state: present
 
 - name: Set repo facts [Fedora]
