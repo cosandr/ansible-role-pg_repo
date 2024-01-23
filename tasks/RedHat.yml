@@ -1,29 +1,31 @@
 ---
 
-- name: Download PGDG GPG key
-  ansible.builtin.get_url:
-    url: "https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG"
-    dest: "/etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG"
-    owner: root
-    group: root
-    mode: 0644
-
-- name: Install PGSQL rpm key
-  ansible.builtin.rpm_key:
-    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG
-    state: present
-
 - name: Set repo facts [Fedora]
   ansible.builtin.set_fact:
     __psql_repo_url: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/fedora/fedora-$releasever-$basearch"
     __psql_common_url: "https://download.postgresql.org/pub/repos/yum/common/fedora/fedora-$releasever-$basearch"
+    __psql_gpg_url: "https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-Fedora"
   when: ansible_distribution == 'Fedora'
 
 - name: Set repo facts [EL]
   ansible.builtin.set_fact:
     __psql_repo_url: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-$releasever-$basearch"
     __psql_common_url: "https://download.postgresql.org/pub/repos/yum/common/redhat/rhel-$releasever-$basearch"
+    __psql_gpg_url: "https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL"
   when: ansible_distribution != 'Fedora'
+
+- name: Download PGDG GPG key
+  ansible.builtin.get_url:
+    url: "{{ __psql_gpg_url }}"
+    dest: "/etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install PGSQL rpm key
+  ansible.builtin.rpm_key:
+    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG
+    state: present
 
 - name: Install repositories
   ansible.builtin.yum_repository:
@@ -54,4 +56,4 @@
     no_extra_spaces: false
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
